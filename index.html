@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>PDA Interativo</title>
+</head>
+<body>
+    <h1>Autômato com Pilha (PDA)</h1>
+    <label for="entrada">Digite a cadeia de entrada (a's, b's e c's):</label>
+    <input type="text" id="entrada">
+    <button onclick="executarPDA()">Executar</button>
+    <p id="resultado"></p>
+
+    <script>
+        class PDA {
+            constructor() {
+                this.pilha = [];
+                this.estado = 'q1';
+            }
+
+            transicao(entrada) {
+                const transicoes = {
+                    'q1': () => {
+                        this.pilha.push('$');
+                        this.estado = 'q2';
+                    },
+                    'q2': () => {
+                        if (entrada === 'a') {
+                            this.pilha.push('a');
+                        }
+                        this.estado = 'q5';
+                    },
+                    'q5': () => {
+                        if (entrada === 'b' && this.pilha.length > 0 && this.pilha[this.pilha.length - 1] === 'a') {
+                            this.pilha.pop();
+                        }
+                        this.estado = 'q6';
+                    },
+                    'q6': () => {
+                        if (entrada === 'c') {
+                            this.estado = 'q7';
+                        }
+                    },
+                    'q7': () => {
+                        if (this.pilha.length > 0 && this.pilha[this.pilha.length - 1] === '$') {
+                            this.pilha.pop();
+                            this.estado = 'q7';
+                        }
+                    }
+                };
+
+                if (transicoes[this.estado]) {
+                    transicoes[this.estado](entrada);
+                }
+            }
+
+            executar(cadeiaEntrada) {
+                for (let char of cadeiaEntrada) {
+                    this.transicao(char);
+                }
+                this.transicao(); // Para transições épsilon
+                return this.estado === 'q7' && this.pilha.length === 0;
+            }
+        }
+
+        function executarPDA() {
+            const entrada = document.getElementById('entrada').value;
+            const pda = new PDA();
+            const resultado = pda.executar(entrada);
+            document.getElementById('resultado').innerText = resultado ? "Cadeia aceita!" : "Cadeia rejeitada!";
+        }
+    </script>
+</body>
+</html>
